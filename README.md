@@ -1,66 +1,73 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Pasos para instalar el proyecto
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+### clonarlo
+E ir al directorio raíz
 
-## About Laravel
+`cd login-dashboard-demo`
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### instalar dependencias
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+`composer install`
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+`npm install`
 
-## Learning Laravel
+### generar APP_KEY
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+`php artisan key:generate`
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### crear archivo sqlite
+`touch database/database.sqlite`
 
-## Laravel Sponsors
+### Elegir sqlite como base de datos
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+Ir al archivo `.env`  y poner en la sección de bases de datos
+ `DB_CONNECTION=sqlite`
 
-### Premium Partners
+### Migrar
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[CMS Max](https://www.cmsmax.com/)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
-- **[Romega Software](https://romegasoftware.com)**
+`php artisan migrate`
 
-## Contributing
+### LLenar la BBDD con los usuarios para prueba
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+`php artisan db:seed --class=UserSeeder`
 
-## Code of Conduct
+### Modificar `.env` con la url de la api
+Agregar al final lo siguiente
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+`MIX_REACT_APP_API_BASE_URL=http://localhost:8000/api`
 
-## Security Vulnerabilities
+Que es la url por defecto de laravel
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Levantar el servidor y el front
 
-## License
+`php artisan serve`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Abrir otra terminal en el mismo directorio y hacer
+
+`npm run watch`
+
+## Listo
+ Abrir el navegador en localhost:8000 e introducir las credenciales
+
+## Notas
+Por simplicidad se utiliza sqlite3 para la base de datos.
+Si no se lo tiene instalado ver: [sqlite3](https://www.sqlite.org/download.html)
+
+En caso de querer utilizar mysql, por ejemplo, es necesario proveer las credenciales necesarias en el archivo `.env`. Recordar crear la tabla necesaria
+
+## ¿Cómo funciona?
+
+El sistema utiliza Laravel Sanctum para la autenticación del usuario.
+Existen rutas protegidas a las que se le aplica un _middleware_ para que solo puedan ser accedidas por usuarios que provean un _token_ que es creado cuando el usuario se logea con credenciales válidas, en este caso nombre de usuario y password.
+
+Existe también un _endpoint_ para crear usuarios.
+
+
+Por el lado del frontend, hay un renderizado condicional dependiendo de si el usuario esta logeado o no, se mostrarán diferentes componentes.
+Al llegar al sitio, se presenta un formulario para que el usuario ingrese sus credenciales. El formulario realiza un _fetch_ a la url de la api y en caso de ser credenciales válidas podrá acceder al dashboard y modificar sus datos como así también hacer un logout. En caso de hacer un logout, se envía un en _fetch_ su _token_ y su id. Laravel elimina su token y el usuario ya no puede acceder al dashboard sin realizar de nuevo un login.
+
+## Mejoras posibles - errores
+
+- Podría mejorarse la experiencia de usuario mediante avisos al completar los formularios
+- Al recargar la página estando logueado y en el dashboard, redirige al login.
+- Los errores devueltos por la api son inconsistentes. Deberia diseñarse un poco mejor esto.
