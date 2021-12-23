@@ -1,6 +1,8 @@
 # Pasos para instalar el proyecto
 
 ### clonarlo
+`git clone git@github.com:joeldevel/login-dashboard-demo.git`
+
 E ir al directorio raíz
 
 `cd login-dashboard-demo`
